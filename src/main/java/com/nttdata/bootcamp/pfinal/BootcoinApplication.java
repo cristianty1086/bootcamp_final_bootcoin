@@ -16,7 +16,6 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import reactor.core.publisher.Flux;
 
 @SpringBootApplication
 @Slf4j
@@ -34,6 +33,7 @@ public class BootcoinApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		repository.deleteAll();
+		/*
 		Flux.just(Parameter.builder().parameter("PaymentType").value("Yanki").build())
 				.flatMap(p -> repository.save(p)).subscribe(p -> log.info("Insert: " + p.toString()));
 		Flux.just(Parameter.builder().parameter("PaymentType").value("Transfer").build())
@@ -52,6 +52,8 @@ public class BootcoinApplication implements CommandLineRunner {
 				.flatMap(p -> repository.save(p)).subscribe(p -> log.info("Insert: " + p.toString()));
 		Flux.just(Parameter.builder().parameter("VentaBootcoin").value("19.70").build())
 				.flatMap(p -> repository.save(p)).subscribe(p -> log.info("Insert: " + p.toString()));
+
+		 */
 	}
 	@Bean
 	public ReactiveRedisTemplate<String, Parameter> reactiveJsonPostRedisTemplate(

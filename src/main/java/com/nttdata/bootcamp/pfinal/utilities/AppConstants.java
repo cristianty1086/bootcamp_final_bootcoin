@@ -11,6 +11,7 @@ public class AppConstants {
     public static String baseUrlBankAccounts = "http://localhost:8084";
     public static String baseUrlYanki = "http://localhost:9045";
     public static String baseUrlBootcoin = "http://localhost:9046";
+    public static String baseUrlParameters = "http://localhost:9044";
     public static String getCurrentUrl() {
         String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
         String appConfigPath = rootPath + "application.properties";

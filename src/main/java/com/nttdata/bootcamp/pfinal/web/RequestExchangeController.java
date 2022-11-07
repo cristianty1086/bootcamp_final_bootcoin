@@ -1,16 +1,22 @@
 package com.nttdata.bootcamp.pfinal.web;
 
+import com.nttdata.bootcamp.pfinal.domain.BootcoinTransaction;
+import com.nttdata.bootcamp.pfinal.domain.Parameter;
 import com.nttdata.bootcamp.pfinal.domain.RequestExchange;
 import com.nttdata.bootcamp.pfinal.repository.RequestExchangeRepository;
 import com.nttdata.bootcamp.pfinal.utilities.BuilderUrl;
 import com.nttdata.bootcamp.pfinal.web.mapper.RequestExchangeMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -21,6 +27,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/v1/bootcoin/exchange")
 @RefreshScope
 public class RequestExchangeController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RequestExchangeController.class);
 
     @Autowired
     RequestExchangeRepository requestExchangeRepository;
@@ -54,9 +61,36 @@ public class RequestExchangeController {
                     // crear las transacciones bootcoin si existe el vendedor
                     if( requestExchange.getSellerBootcoinWalletId() != null &&
                             requestExchange.getSellerPaymentType() != null ) {
-                        //String url1 = BuilderUrl.buildCountCreditCards(costumer.getId());
-                        //restTemplate.getForObject()
-                        //restTemplate.postForObject();
+                        String url1 = BuilderUrl.buildGetCompraBootcoin();
+                        Parameter parameterCompraBootcoin = restTemplate.getForObject(url1, Parameter.class);
+
+                        // orden de compra de usuario 1
+                        String url2 = BuilderUrl.buildPostBootcoinTransaction();
+
+                        // orden de venta de usuario 2
+                        String url3 = BuilderUrl.buildPostBootcoinTransaction();
+                        try{
+                            BootcoinTransaction bt = new BootcoinTransaction();
+                            bt.setAmount(requestExchange.getAmount());
+                            bt.setRequestExchangueId(requestExchange.getId());
+                            bt.setBootcoinWalletId(requestExchange.getBuyerBootcoinWalletId());
+                            bt.setTransactionType("BUY");
+                            restTemplate.postForObject(url2, bt, BootcoinTransaction.class);
+
+                            BootcoinTransaction bt2 = new BootcoinTransaction();
+                            bt.setAmount(requestExchange.getAmount());
+                            bt.setRequestExchangueId(requestExchange.getId());
+                            bt.setBootcoinWalletId(requestExchange.getSellerBootcoinWalletId());
+                            bt.setTransactionType("SELL");
+                            restTemplate.postForObject(url3, bt2, BootcoinTransaction.class);
+                        } catch (ResponseStatusException ex) {
+                            LOGGER.info(ex.getMessage());
+                            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se pudo registrar el pago del comprador", null);
+                        }
+
+                        // TODO modificar cuenta bancaria
+
+
                     }
                     requestExchangeMapper.update(dbTransaction, requestExchange);
                     return requestExchangeRepository.save(dbTransaction);
